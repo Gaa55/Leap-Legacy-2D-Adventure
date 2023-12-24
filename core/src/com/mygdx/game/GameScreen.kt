@@ -62,24 +62,24 @@ class GameScreen(private var game: MainGame) : Screen {
         val resolver =
             FileHandleResolver { fileName ->
                 // Проверяем имя файла тайлсета и возвращаем соответствующий FileHandle
-                if (fileName == "TX Village Props.tsx") {
+                if (fileName == "TX Village Propss.tsx") {
                     return@FileHandleResolver Gdx.files.internal("TX Village Props.tsx")
-                } else if (fileName == "TX Tileset Ground.tsx") {
+                } else if (fileName == "TX Tileset Groundd.tsx") {
                     return@FileHandleResolver Gdx.files.internal("TX Tileset Ground.tsx")
-                } else if (fileName == "Background.png") {
+                } else if (fileName == "Backgroundd.png") {
                     return@FileHandleResolver Gdx.files.internal("Background.png")
-                } else if (fileName == "GameMap.tmx") {
-                    return@FileHandleResolver Gdx.files.internal("GameMap.tmx")
+                } else if (fileName == "Leap_Legacy_2d_Adventure.tmx") {
+                    return@FileHandleResolver Gdx.files.internal("Leap_Legacy_2d_Adventure.tmx")
                 }
                 null // Возвращаем null, если не удалось разрешить путь
             }
         if (map == null) {
-            map = TmxMapLoader(resolver).load("GameMap.tmx", parameters)
+            map = TmxMapLoader(resolver).load("Leap_Legacy_2d_Adventure.tmx", parameters)
         }
         if (map != null) {
-            collisionLayer = map!!.layers["Tile_1"] as TiledMapTileLayer
+            collisionLayer = map!!.layers["ground"] as TiledMapTileLayer
             if (collisionLayer == null) {
-                collisionLayer = map!!.layers["Tile_1"] as TiledMapTileLayer
+                collisionLayer = map!!.layers["ground"] as TiledMapTileLayer
             }
         }
         val mapObjects = map!!.layers["Trigger_final"].objects // получение объектов из слоя
@@ -209,6 +209,7 @@ class GameScreen(private var game: MainGame) : Screen {
         playerVelocity.y += gravity // Применяем гравитацию
         playerPosition.add(playerVelocity) // Обновляем позицию игрока
         handleInput()
+        checkTriggers()
 
         // Ограничение, чтобы игрок не уходил под землю
         if (playerPosition.y < 0) {

@@ -31,8 +31,8 @@ class MainMenuScreen(private val maingame:MainGame) : Screen {
 
         val startDrawable: Drawable = TextureRegionDrawable(TextureRegion(startTexture))
         val start = ImageButton(startDrawable)
-        start.setSize(100f, 100f)
-        start.setPosition(200f, 30f)
+        start.setSize(200f, 200f)
+        start.setPosition(640f, 30f)
 
         start.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
@@ -56,7 +56,7 @@ class MainMenuScreen(private val maingame:MainGame) : Screen {
         backgroundSprite.draw(batch)
         font.color = Color.BLACK
         font.data.setScale(4f)
-        font.draw(batch, "Leap Legacy: 2D Adventure", 640f, 400f)
+        font.draw(batch, "Leap Legacy: 2D Adventure", 300f, 300f)
         batch.end()
 
         stage.act(delta)

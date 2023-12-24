@@ -22,14 +22,12 @@ plugins {
 }
 
 compileJava {
-    // Укажите целевую версию JVM для Java-кода
-    targetCompatibility = '1.8' // Используйте нужную вам версию, например, '1.8' для Java 8
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 }
 
-
 tasks.withType(KotlinCompile).configureEach {
-    // Укажите целевую версию JVM для Kotlin-кода
-    kotlinOptions.jvmTarget = '1.8' // Используйте нужную вам версию, например, '1.8' для Java 8
+    kotlinOptions.jvmTarget = '1.8'
 }
 
 allprojects {
@@ -86,10 +84,9 @@ project(":android") {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     }
     android {
-        // Другие конфигурации
         compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_18
-            targetCompatibility = JavaVersion.VERSION_18
+            sourceCompatibility = '1.8'
+            targetCompatibility = '1.8'
         }
     }
 }

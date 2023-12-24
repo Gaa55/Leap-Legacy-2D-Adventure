@@ -1,0 +1,46 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "GameMap.tmx",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "Все файлы (*)",
+    "fileStates": {
+        "Background.tsx": {
+            "scaleInDock": 0.5
+        },
+        "GameMap.tmx": {
+            "scale": 0.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 2944,
+                "y": 794
+            }
+        },
+        "TX Tileset Ground.tsx": {
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
+        },
+        "TX Village Props.tsx": {
+            "scaleInDock": 0.5
+        },
+        "sky.tsx": {
+            "scaleInDock": 0.5
+        }
+    },
+    "last.imagePath": "C:/Projects/PlatformOpat/assets/Pixel Art Platformer - Village Props v2.3.0/Texture",
+    "map.fixedSize": true,
+    "map.height": 30,
+    "map.width": 200,
+    "openFiles": [
+        "GameMap.tmx"
+    ],
+    "project": "Level_1.tiled-project",
+    "recentFiles": [
+        "GameMap.tmx",
+        "TX Tileset Ground.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}

@@ -3,7 +3,6 @@ buildscript {
     ext.kotlinVersion = '1.9.22'
     project.ext.mainClassName = "MainGame"
 
-
     repositories {
         mavenLocal()
         mavenCentral()
@@ -22,15 +21,15 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.22' // Ensure you have the desired Kotlin version
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(1.8)) // Устанавливаем целевую версию JVM для Java
-    }
+compileJava {
+    // Укажите целевую версию JVM для Java-кода
+    targetCompatibility = '1.8' // Используйте нужную вам версию, например, '1.8' для Java 8
 }
 
 
 tasks.withType(KotlinCompile).configureEach {
-    kotlinOptions.jvmTarget = "1.8" // Установите целевую версию JVM для Kotlin
+    // Укажите целевую версию JVM для Kotlin-кода
+    kotlinOptions.jvmTarget = '1.8' // Используйте нужную вам версию, например, '1.8' для Java 8
 }
 
 allprojects {

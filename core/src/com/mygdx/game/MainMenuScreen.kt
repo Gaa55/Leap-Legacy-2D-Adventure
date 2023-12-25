@@ -26,6 +26,7 @@ class MainMenuScreen(private val maingame:MainGame) : Screen {
 
     init {
         val startTexture = Texture(Gdx.files.internal("Play@2x.png"))
+        val vikTexture=Texture(Gdx.files.internal("Levels.png"))
         val backgroundTexture = Texture(Gdx.files.internal("sky.png"))
         backgroundSprite = Sprite(backgroundTexture)
 
@@ -40,8 +41,20 @@ class MainMenuScreen(private val maingame:MainGame) : Screen {
                 maingame.setScreen(gameScreen)
             }
         })
+        val vikDrawable: Drawable = TextureRegionDrawable(TextureRegion(vikTexture))
+        val vik = ImageButton(vikDrawable)
+        vik.setSize(200f, 200f)
+        vik.setPosition(940f, 30f)
+
+        vik.addListener(object : ClickListener() {
+            override fun clicked(event: InputEvent?, x: Float, y: Float) {
+                val victoryScreen = VictoryScreen(maingame)
+                maingame.setScreen(victoryScreen)
+            }
+        })
 
         stage.addActor(start)
+        stage.addActor(vik)
     }
 
     override fun show() {
@@ -74,6 +87,4 @@ class MainMenuScreen(private val maingame:MainGame) : Screen {
     override fun hide() {}
 
     override fun dispose() {}
-
-    // Остальные методы интерфейса Screen (pause, resume, hide, dispose) можно оставить пустыми или реализовать по необходимости
 }

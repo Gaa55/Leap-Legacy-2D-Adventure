@@ -1,0 +1,101 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "Все файлы (*)",
+    "fileStates": {
+        "Background.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Projects/KotlinPlatform/assets/Background.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "C:/Projects/KotlinPlatform/assets/Backgroundd.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Projects/KotlinPlatform/assets/GameMap.tmx": {
+            "scale": 0.5,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 932,
+                "y": 1034
+            }
+        },
+        "C:/Projects/KotlinPlatform/assets/GameMapp.tmx": {
+            "scale": 0.17812499999999998,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1790.8771929824563,
+                "y": 797.1929824561404
+            }
+        },
+        "C:/Projects/KotlinPlatform/assets/TX Tileset Ground.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Projects/KotlinPlatform/assets/TX Tileset Groundd.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "C:/Projects/KotlinPlatform/assets/TX Village Props.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Projects/KotlinPlatform/assets/TX Village Propss.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Projects/KotlinPlatform/assets/sky.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
+        "C:/Projects/KotlinPlatform/assets/skyy.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
+        "GameMap.tmx": {
+            "scale": 0.125,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 1592,
+                "y": -600
+            }
+        },
+        "TX Tileset Ground.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "TX Village Props.tsx": {
+            "scaleInDock": 0.75,
+            "scaleInEditor": 1
+        },
+        "sky.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.externalTilesetPath": "C:/Projects/KotlinPlatform/assets",
+    "last.imagePath": "C:/Projects/PlatformOpat/assets/MagicCliffsGodot/MagicCliffsGodot/World",
+    "map.height": 30,
+    "map.lastUsedFormat": "tmx",
+    "map.width": 70,
+    "openFiles": [
+    ],
+    "project": "gameMap.tiled-project",
+    "recentFiles": [
+        "C:/Projects/KotlinPlatform/assets/GameMap.tmx",
+        "C:/Projects/KotlinPlatform/assets/GameMapp.tmx",
+        "C:/Projects/KotlinPlatform/assets/TX Tileset Ground.tsx",
+        "TX Tileset Ground.tsx",
+        "TX Village Props.tsx",
+        "Background.tsx",
+        "GameMap.tmx",
+        "sky.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}

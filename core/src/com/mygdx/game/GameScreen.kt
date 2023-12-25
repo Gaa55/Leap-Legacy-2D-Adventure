@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.maps.MapObjects
+import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
@@ -45,6 +46,8 @@ class GameScreen(private var game: MainGame) : Screen {
     private val gravity = -2f // Гравитация
     private val jumpVelocity = 30f // Скорость прыжка
     private val moveSpeed = 5f // Скорость движения
+    private var jumpCount = 0
+    private val maxJumps = 2 // Максимальное количество прыжков
 
     init {
         game = game
@@ -52,7 +55,7 @@ class GameScreen(private var game: MainGame) : Screen {
 
     override fun show() {
         batch = SpriteBatch()
-        playerTexture = Texture("player.png")
+        playerTexture = Texture("Pink_Monster.png")
         // Создаем загрузчик карты
         val parameters = TmxMapLoader.Parameters()
         parameters.textureMinFilter = Texture.TextureFilter.Linear
@@ -62,27 +65,27 @@ class GameScreen(private var game: MainGame) : Screen {
         val resolver =
             FileHandleResolver { fileName ->
                 // Проверяем имя файла тайлсета и возвращаем соответствующий FileHandle
-                if (fileName == "TX Village Propss.tsx") {
+                if (fileName == "TX Village Props.tsx") {
                     return@FileHandleResolver Gdx.files.internal("TX Village Props.tsx")
-                } else if (fileName == "TX Tileset Groundd.tsx") {
+                } else if (fileName == "TX Tileset Ground.tsx") {
                     return@FileHandleResolver Gdx.files.internal("TX Tileset Ground.tsx")
-                } else if (fileName == "Backgroundd.png") {
+                } else if (fileName == "Background.png") {
                     return@FileHandleResolver Gdx.files.internal("Background.png")
-                } else if (fileName == "Leap_Legacy_2d_Adventure.tmx") {
-                    return@FileHandleResolver Gdx.files.internal("Leap_Legacy_2d_Adventure.tmx")
+                } else if (fileName == "GameMap.tmx") {
+                    return@FileHandleResolver Gdx.files.internal("GameMap.tmx")
                 }
                 null // Возвращаем null, если не удалось разрешить путь
             }
         if (map == null) {
-            map = TmxMapLoader(resolver).load("Leap_Legacy_2d_Adventure.tmx", parameters)
+            map = TmxMapLoader(resolver).load("GameMap.tmx", parameters)
         }
         if (map != null) {
-            collisionLayer = map!!.layers["ground"] as TiledMapTileLayer
+            collisionLayer = map!!.layers["Tile_1"] as TiledMapTileLayer
             if (collisionLayer == null) {
-                collisionLayer = map!!.layers["ground"] as TiledMapTileLayer
+                collisionLayer = map!!.layers["Tile_1"] as TiledMapTileLayer
             }
         }
-        val mapObjects = map!!.layers["Trigger_final"].objects // получение объектов из слоя
+        mapObjects = map!!.layers["Trigger_final"].objects
 
         // Продолжайте работу с вашей загруженной картой здесь
         playerPosition = Vector2(700f, 350f)
@@ -161,20 +164,39 @@ class GameScreen(private var game: MainGame) : Screen {
                 jump()
             }
         })
+
     }
 
     fun checkTriggers() {
+        val playerBounds = Rectangle(
+            playerPosition.x,
+            playerPosition.y,
+            playerTexture!!.width.toFloat(),
+            playerTexture!!.height.toFloat()
+        )
+
+        mapObjects = map!!.layers["Trigger_final"].objects // Обновляем mapObjects
+
         if (mapObjects != null) {
             for (mapObject in mapObjects!!) {
-                if (mapObject.name != null && mapObject.name == "Trigger_final") {
-                    game.setScreen(VictoryScreen(game)) // Переход на VictoryScreen
-                    break // Если нужно выйти из цикла после обнаружения триггера
+                // Логика обработки столкновений
+                if (mapObject is RectangleMapObject) {
+                    val rectangle = mapObject.rectangle
+                    val x = rectangle.x
+                    val y = rectangle.y
+                    val width = rectangle.width
+                    val height = rectangle.height
+
+                    val bounds = Rectangle(x, y, width, height)
+                    if (playerBounds.overlaps(bounds)) {
+                        game.setScreen(VictoryScreen(game))
+                        break
+                    }
                 }
             }
-        } else {
-            return
         }
     }
+
 
     override fun render(delta: Float) {
         // Clear the screen
@@ -183,6 +205,7 @@ class GameScreen(private var game: MainGame) : Screen {
         for (layer in map!!.layers) {
             println(layer.name)
         }
+        checkTriggers()
         handleInput() // Handle user input
         update() // Update game logic
         camera!!.position[playerPosition.x, playerPosition.y] = 0f
@@ -205,7 +228,6 @@ class GameScreen(private var game: MainGame) : Screen {
     }
 
     private fun update() {
-        // Add your game logic here
         playerVelocity.y += gravity // Применяем гравитацию
         playerPosition.add(playerVelocity) // Обновляем позицию игрока
         handleInput()
@@ -236,6 +258,9 @@ class GameScreen(private var game: MainGame) : Screen {
                 playerPosition.y = ((tileYBottom + 1) * collisionLayer!!.tileHeight).toFloat()
                 playerVelocity.y = 0f
             }
+            if (playerVelocity.y == 0f) { // Если игрок не движется по оси Y (приземлился)
+                jumpCount = 0 // Сброс счетчика прыжков
+            }
         } else if (playerVelocity.y > 0) {
             val tileXTopLeft = playerPosition.x.toInt() / collisionLayer!!.tileWidth
             val tileXTopRight =
@@ -253,58 +278,61 @@ class GameScreen(private var game: MainGame) : Screen {
             }
         }
 
-        // Проверка нажатия клавиш для движения
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            playerVelocity.x = -moveSpeed
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            playerVelocity.x = moveSpeed
-        } else {
-            playerVelocity.x = 0f
-        }
-
         // Ограничение, чтобы игрок не уходил за границы экрана
         if (playerPosition.x < 0) {
             playerPosition.x = 0f
         }
+        val rightBoundary = (collisionLayer!!.width * collisionLayer!!.tileWidth).toFloat()
+        val playerRightEdge = playerPosition.x + playerTexture!!.width
+        if (playerRightEdge > rightBoundary) {
+            playerPosition.x = rightBoundary - playerTexture!!.width
+        }
     }
 
     private fun handleXCollision() {
-        // Движение влево
-    }
+        val newPositionX = playerPosition.x + playerVelocity.x
+        val playerBounds = Rectangle(newPositionX, playerPosition.y, playerTexture!!.width.toFloat(), playerTexture!!.height.toFloat())
+
+        for (x in 0 until collisionLayer!!.width) {
+            for (y in 0 until collisionLayer!!.height) {
+                val cell = collisionLayer!!.getCell(x, y)
+                if (cell != null) {
+                    val tileBounds = Rectangle(x * collisionLayer!!.tileWidth.toFloat(), y * collisionLayer!!.tileHeight.toFloat(), collisionLayer!!.tileWidth.toFloat(), collisionLayer!!.tileHeight.toFloat())
+
+                    if (playerBounds.overlaps(tileBounds)) {
+                        playerVelocity.x = 0f // Останавливаем движение по X
+                        if (playerVelocity.x > 0) {
+                            playerPosition.x = tileBounds.x - playerTexture!!.width
+                        } else if (playerVelocity.x < 0) {
+                            playerPosition.x = tileBounds.x + tileBounds.width
+                        }
+                    }
+                }
+            }
+        }
+        }
 
     private fun handleYCollision() {
-        // Проверяем коллизии при падении вниз
-        if (playerVelocity.y < 0) {
-            val tileYBottom =
-                (playerPosition.y + 1).toInt() / collisionLayer!!.tileHeight // Увеличиваем координату y, чтобы персонаж не застревал
-            if (collisionLayer!!.getCell(
-                    playerPosition.x.toInt() / collisionLayer!!.tileWidth,
-                    tileYBottom
-                ) != null ||
-                collisionLayer!!.getCell(
-                    (playerPosition.x + playerTexture!!.width - 1).toInt() / collisionLayer!!.tileWidth,
-                    tileYBottom
-                ) != null
-            ) {
-                playerPosition.y =
-                    ((tileYBottom + 1) * collisionLayer!!.tileHeight).toFloat() // Устанавливаем игрока на уровень тайла
-                playerVelocity.y = 0f
-            }
-        } else if (playerVelocity.y > 0) {
-            val tileYTop =
-                (playerPosition.y + playerTexture!!.height).toInt() / collisionLayer!!.tileHeight // Увеличиваем координату y, чтобы персонаж не застревал
-            if (collisionLayer!!.getCell(
-                    playerPosition.x.toInt() / collisionLayer!!.tileWidth,
-                    tileYTop
-                ) != null ||
-                collisionLayer!!.getCell(
-                    (playerPosition.x + playerTexture!!.width - 1).toInt() / collisionLayer!!.tileWidth,
-                    tileYTop
-                ) != null
-            ) {
-                playerPosition.y =
-                    (tileYTop * collisionLayer!!.tileHeight - playerTexture!!.height - 1).toFloat() // Устанавливаем игрока на уровень тайла
-                playerVelocity.y = 0f
+        val newPositionY = playerPosition.y + playerVelocity.y
+        val playerBounds = Rectangle(playerPosition.x, newPositionY, playerTexture!!.width.toFloat(), playerTexture!!.height.toFloat())
+
+        for (x in 0 until collisionLayer!!.width) {
+            for (y in 0 until collisionLayer!!.height) {
+                val cell = collisionLayer!!.getCell(x, y)
+                if (cell != null) {
+                    val tileBounds = Rectangle(x * collisionLayer!!.tileWidth.toFloat(), y * collisionLayer!!.tileHeight.toFloat(), collisionLayer!!.tileWidth.toFloat(), collisionLayer!!.tileHeight.toFloat())
+
+                    if (cell.tile.properties.containsKey("collision")) {
+                        if (playerBounds.overlaps(tileBounds)) {
+                            playerVelocity.y = 0f // Останавливаем движение по Y
+                            if (playerVelocity.y < 0) {
+                                playerPosition.y = tileBounds.y + tileBounds.height
+                            } else if (playerVelocity.y > 0) {
+                                playerPosition.y = tileBounds.y - playerTexture!!.height
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -332,7 +360,11 @@ class GameScreen(private var game: MainGame) : Screen {
     }
 
     private fun jump() {
-        playerVelocity.y = jumpVelocity
+        if (jumpCount < maxJumps) {
+            playerVelocity.y = jumpVelocity
+            jumpCount++
+
+        }
     }
 
     override fun resize(width: Int, height: Int) {}

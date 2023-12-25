@@ -1,53 +1,53 @@
 package com.mygdx.game
 
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.scenes.scene2d.ui.Image
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 
-class VictoryScreen(private val game: Game) : Screen {
+class VictoryScreen(private val maingame: MainGame) : Screen {
 
     private var stage: Stage = Stage(ScreenViewport())
+    private val font: BitmapFont = BitmapFont()
 
     override fun show() {
-        stage = Stage(ScreenViewport())
+        val texture = Texture(Gdx.files.internal("Default.png"))
+        val buttonStyle = ImageButton.ImageButtonStyle()
+        buttonStyle.up = TextureRegionDrawable(texture)
 
-        val yourBitmapFont = BitmapFont(Gdx.files.internal("com/badlogic/gdx/utils/default.fnt"), false)
-        val labelStyle = Label.LabelStyle()
-        labelStyle.font = yourBitmapFont
-        labelStyle.fontColor = Color.WHITE
-
-        val label = Label("Вы победили!!!!!", labelStyle)
-        label.setPosition(640f, 640f)
-
-        val textButtonStyle = TextButton.TextButtonStyle()
-        textButtonStyle.font = yourBitmapFont
-        textButtonStyle.fontColor = Color.WHITE
-
-        val backButton = TextButton("В меню", textButtonStyle)
-        backButton.setPosition(300f, 200f)
-        backButton.addListener(object : ClickListener() {
+        val button = ImageButton(buttonStyle)
+        button.setPosition(300f, 200f)
+        button.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                // Действия по нажатию кнопки "В меню"
+                // Переход обратно в главное меню при нажатии кнопки "домой"
+                maingame.screen = MainMenuScreen(maingame)
             }
         })
 
-        stage.addActor(label)
-        stage.addActor(backButton)
+        val labelStyle = Label.LabelStyle(font, font.color) // Создание стиля для текста
+        val label = Label("Вы победили!", labelStyle) // Создание объекта Label с текстом "Вы победили!"
 
+        label.setPosition(300f, 400f) // Установка позиции надписи на экране
+
+        stage.addActor(label) // Добавление надписи на сцену
         Gdx.input.inputProcessor = stage
     }
 
     override fun render(delta: Float) {
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
+        Gdx.gl.glClearColor(1f, 1f, 1f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
         stage.act(delta)
@@ -62,5 +62,8 @@ class VictoryScreen(private val game: Game) : Screen {
 
     override fun hide() {}
 
-    override fun dispose() {}
+    override fun dispose() {
+        stage.dispose()
+        font.dispose()
+    }
 }

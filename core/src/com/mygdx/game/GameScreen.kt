@@ -1,6 +1,5 @@
 package com.mygdx.game
 
-import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.Screen
@@ -50,14 +49,11 @@ class GameScreen(private var game: MainGame) : Screen {
     private var jumpCount = 0
     private val maxJumps = 2 // Максимальное количество прыжков
 
-
     init {
         game = game
     }
 
     override fun show() {
-        Gdx.app.setLogLevel(Application.LOG_INFO);
-        System.out.println(mapObjects)
         batch = SpriteBatch()
         playerTexture = Texture("Pink_Monster.png")
         // Создаем загрузчик карты
@@ -168,22 +164,22 @@ class GameScreen(private var game: MainGame) : Screen {
                 jump()
             }
         })
+
     }
 
     fun checkTriggers() {
-        println("Checking triggers...")
         val playerBounds = Rectangle(
             playerPosition.x,
             playerPosition.y,
             playerTexture!!.width.toFloat(),
             playerTexture!!.height.toFloat()
         )
+
         mapObjects = map!!.layers["Trigger_final"].objects // Обновляем mapObjects
 
         if (mapObjects != null) {
             for (mapObject in mapObjects!!) {
-                // Тут должен быть вывод для каждого объекта, чтобы убедиться, что они обнаруживаются
-                println("Found map object: $mapObject")
+                // Логика обработки столкновений
                 if (mapObject is RectangleMapObject) {
                     val rectangle = mapObject.rectangle
                     val x = rectangle.x
@@ -192,26 +188,24 @@ class GameScreen(private var game: MainGame) : Screen {
                     val height = rectangle.height
 
                     val bounds = Rectangle(x, y, width, height)
-                    // Добавим условие для перехода к VictoryScreen при пересечении объекта или при x > 900
-                    if (playerBounds.overlaps(bounds) || playerPosition.x > 900) {
+                    if (playerBounds.overlaps(bounds)) {
                         game.setScreen(VictoryScreen(game))
-                        return // Для прекращения цикла после перехода к VictoryScreen
+                        break
                     }
                 }
             }
         }
     }
 
+
     override fun render(delta: Float) {
         // Clear the screen
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-        checkTriggers() // Добавьте вызов здесь перед остальным кодом
-        handleTriggerFinalCollision()
         for (layer in map!!.layers) {
             println(layer.name)
         }
-
+        checkTriggers()
         handleInput() // Handle user input
         update() // Update game logic
         camera!!.position[playerPosition.x, playerPosition.y] = 0f
@@ -231,7 +225,6 @@ class GameScreen(private var game: MainGame) : Screen {
         batch!!.end()
         stage!!.act(delta) // Update the stage
         stage!!.draw() // Render the stage
-        Gdx.app.log("mapObject", "map objects");
     }
 
     private fun update() {
@@ -239,7 +232,6 @@ class GameScreen(private var game: MainGame) : Screen {
         playerPosition.add(playerVelocity) // Обновляем позицию игрока
         handleInput()
         checkTriggers()
-        handleTriggerFinalCollision()
 
         // Ограничение, чтобы игрок не уходил под землю
         if (playerPosition.y < 0) {
@@ -294,38 +286,6 @@ class GameScreen(private var game: MainGame) : Screen {
         val playerRightEdge = playerPosition.x + playerTexture!!.width
         if (playerRightEdge > rightBoundary) {
             playerPosition.x = rightBoundary - playerTexture!!.width
-        }
-    }
-
-    fun handleTriggerFinalCollision() {
-        val playerBounds = Rectangle(
-            playerPosition.x,
-            playerPosition.y,
-            playerTexture!!.width.toFloat(),
-            playerTexture!!.height.toFloat()
-        )
-        mapObjects = map!!.layers["Trigger_final"].objects
-
-        if (mapObjects != null) {
-            for (mapObject in mapObjects!!) {
-                if (mapObject is RectangleMapObject) {
-                    val rectangle = mapObject.rectangle
-                    val bounds = Rectangle(
-                        rectangle.x,
-                        rectangle.y,
-                        rectangle.width,
-                        rectangle.height
-                    )
-
-                    if (playerBounds.overlaps(bounds)) {
-                        // Обработка столкновения игрока с объектом trigger_final
-                        // Можно добавить здесь логику взаимодействия
-                        // Например, вызвать функцию для перехода на VictoryScreen
-                        game.setScreen(VictoryScreen(game))
-                        return // Завершаем цикл после обнаружения столкновения
-                    }
-                }
-            }
         }
     }
 

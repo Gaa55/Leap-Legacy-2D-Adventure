@@ -1,12 +1,15 @@
 package com.mygdx.game
 
+import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.assets.loaders.FileHandleResolver
+import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.maps.MapObjects
@@ -47,15 +50,60 @@ class GameScreen(private var game: MainGame) : Screen {
     private val jumpVelocity = 30f // Скорость прыжка
     private val moveSpeed = 5f // Скорость движения
     private var jumpCount = 0
-    private val maxJumps = 2 // Максимальное количество прыжков
+    private val maxJumps = 2
+    private var backgroundMusic: Music? = null
+    private lateinit var jumpAnimation: Animation<TextureRegion>
+    private lateinit var walkAnimation: Animation<TextureRegion>
+    private var elapsedTime = 0f
 
     init {
         game = game
+
+        val jumpFrame1Texture = Texture(Gdx.files.internal("Pink_Monster_Jump_1_1.png"))
+        val jumpFrame2Texture = Texture(Gdx.files.internal("Pink_Monster_Jump_1_2.png"))
+        val jumpFrame3Texture = Texture(Gdx.files.internal("Pink_Monster_Jump_1_3.png"))
+        val jumpFrame4Texture = Texture(Gdx.files.internal("Pink_Monster_Jump_1_4.png"))
+        val jumpFrame5Texture = Texture(Gdx.files.internal("Pink_Monster_Jump_1_5.png"))
+        val jumpFrame6Texture = Texture(Gdx.files.internal("Pink_Monster_Jump_1_6.png"))
+        val jumpFrame7Texture = Texture(Gdx.files.internal("Pink_Monster_Jump_1_7.png"))
+        val jumpFrame8Texture = Texture(Gdx.files.internal("Pink_Monster_Jump_1_8.png"))
+        val jumpFrame1 = TextureRegion(jumpFrame1Texture)
+        val jumpFrame2 = TextureRegion(jumpFrame2Texture)
+        val jumpFrame3 = TextureRegion(jumpFrame3Texture)
+        val jumpFrame4 = TextureRegion(jumpFrame4Texture)
+        val jumpFrame5 = TextureRegion(jumpFrame5Texture)
+        val jumpFrame6 = TextureRegion(jumpFrame6Texture)
+        val jumpFrame7 = TextureRegion(jumpFrame7Texture)
+        val jumpFrame8 = TextureRegion(jumpFrame8Texture)
+        val jumpFrames = arrayOf(jumpFrame1, jumpFrame2, jumpFrame3, jumpFrame4, jumpFrame5, jumpFrame6, jumpFrame7, jumpFrame8)
+        jumpAnimation = Animation(0.1f, *jumpFrames)
+        jumpAnimation?.playMode = Animation.PlayMode.NORMAL
+
+        val walkFrame1Texture = Texture(Gdx.files.internal("Pink_Monster_Run_1_1.png"))
+        val walkFrame2Texture = Texture(Gdx.files.internal("Pink_Monster_Run_1_2.png"))
+        val walkFrame3Texture = Texture(Gdx.files.internal("Pink_Monster_Run_1_3.png"))
+        val walkFrame4Texture = Texture(Gdx.files.internal("Pink_Monster_Run_1_4.png"))
+        val walkFrame5Texture = Texture(Gdx.files.internal("Pink_Monster_Run_1_5.png"))
+        val walkFrame6Texture = Texture(Gdx.files.internal("Pink_Monster_Run_1_6.png"))
+
+        val walkFrame1 = TextureRegion(walkFrame1Texture)
+        val walkFrame2 = TextureRegion(walkFrame2Texture)
+        val walkFrame3 = TextureRegion(walkFrame3Texture)
+        val walkFrame4 = TextureRegion(walkFrame4Texture)
+        val walkFrame5 = TextureRegion(walkFrame5Texture)
+        val walkFrame6 = TextureRegion(walkFrame6Texture)
+
+        val walkFrames = arrayOf(walkFrame1, walkFrame2, walkFrame3, walkFrame4, walkFrame5, walkFrame6)
+        walkAnimation = Animation(0.1f, *walkFrames)
+        walkAnimation?.playMode = Animation.PlayMode.NORMAL
+
     }
 
     override fun show() {
+        Gdx.app.setLogLevel(Application.LOG_INFO);
+        System.out.println(mapObjects)
         batch = SpriteBatch()
-        playerTexture = Texture("Pink_Monster.png")
+        playerTexture = Texture("Pink_Monster_Jump_1_1.png")
         // Создаем загрузчик карты
         val parameters = TmxMapLoader.Parameters()
         parameters.textureMinFilter = Texture.TextureFilter.Linear
@@ -71,7 +119,10 @@ class GameScreen(private var game: MainGame) : Screen {
                     return@FileHandleResolver Gdx.files.internal("TX Tileset Ground.tsx")
                 } else if (fileName == "Background.png") {
                     return@FileHandleResolver Gdx.files.internal("Background.png")
-                } else if (fileName == "GameMap.tmx") {
+                }
+                else if (fileName == "tileset.tsx") {
+                    return@FileHandleResolver Gdx.files.internal("tileset.tsx")}
+                else if (fileName == "GameMap.tmx") {
                     return@FileHandleResolver Gdx.files.internal("GameMap.tmx")
                 }
                 null // Возвращаем null, если не удалось разрешить путь
@@ -87,15 +138,15 @@ class GameScreen(private var game: MainGame) : Screen {
         }
         mapObjects = map!!.layers["Trigger_final"].objects
 
-        // Продолжайте работу с вашей загруженной картой здесь
-        playerPosition = Vector2(700f, 350f)
+
+        playerPosition = Vector2(700f, 900f)
         playerVelocity = Vector2(0f, 0f)
         groundRect = Rectangle(0f, 0f, Gdx.graphics.width.toFloat(), 20f)
         // Инициализация camera перед использованием
         camera = OrthographicCamera(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
         camera!!.setToOrtho(false)
 
-        // Другой ваш код...
+
         // Инициализация поля класса tiledMapRenderer
         tiledMapRenderer = OrthogonalTiledMapRenderer(map)
         tiledMapRenderer!!.setView(camera) // Установка камеры
@@ -104,14 +155,14 @@ class GameScreen(private var game: MainGame) : Screen {
         val forwardTexture = Texture(Gdx.files.internal("forward.png"))
         val forwardDrawable: Drawable = TextureRegionDrawable(TextureRegion(forwardTexture))
         val forward = ImageButton(forwardDrawable)
-        forward.setSize(100f, 100f)
+        forward.setSize(150f, 150f)
         forward.setPosition(200f, 30f)
 
         // Создание кнопки ImageButton назад
         val backwardTexture = Texture(Gdx.files.internal("backward.png"))
         val backwardDrawable: Drawable = TextureRegionDrawable(TextureRegion(backwardTexture))
         val backward = ImageButton(backwardDrawable)
-        backward.setSize(100f, 100f)
+        backward.setSize(150f, 150f)
         backward.setPosition(10f, 30f)
 
         // Создание кнопки ImageButton прыжок
@@ -164,48 +215,21 @@ class GameScreen(private var game: MainGame) : Screen {
                 jump()
             }
         })
-
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("game_theme.mp3"))
+        backgroundMusic!!.isLooping = true
+        backgroundMusic!!.volume = 0.5f
+        backgroundMusic!!.play()
     }
-
-    fun checkTriggers() {
-        val playerBounds = Rectangle(
-            playerPosition.x,
-            playerPosition.y,
-            playerTexture!!.width.toFloat(),
-            playerTexture!!.height.toFloat()
-        )
-
-        mapObjects = map!!.layers["Trigger_final"].objects // Обновляем mapObjects
-
-        if (mapObjects != null) {
-            for (mapObject in mapObjects!!) {
-                // Логика обработки столкновений
-                if (mapObject is RectangleMapObject) {
-                    val rectangle = mapObject.rectangle
-                    val x = rectangle.x
-                    val y = rectangle.y
-                    val width = rectangle.width
-                    val height = rectangle.height
-
-                    val bounds = Rectangle(x, y, width, height)
-                    if (playerBounds.overlaps(bounds)) {
-                        game.setScreen(VictoryScreen(game))
-                        break
-                    }
-                }
-            }
-        }
-    }
-
 
     override fun render(delta: Float) {
         // Clear the screen
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+        elapsedTime += delta // Обновление времени прошедшего для анимации
         for (layer in map!!.layers) {
             println(layer.name)
         }
-        checkTriggers()
+
         handleInput() // Handle user input
         update() // Update game logic
         camera!!.position[playerPosition.x, playerPosition.y] = 0f
@@ -215,29 +239,79 @@ class GameScreen(private var game: MainGame) : Screen {
         tiledMapRenderer!!.setView(camera)
         tiledMapRenderer!!.render()
 
-        // Rendering the player
         batch!!.projectionMatrix = camera!!.combined
         // Установка камеры для tiledMapRenderer перед его рендерингом
         tiledMapRenderer!!.setView(camera) // Обновляем вид камеры здесь
         tiledMapRenderer!!.render()
+
+        stage!!.act(delta)
+        stage!!.draw()
+
+
+        var showCharacter = true // Флаг для отображения спрайта персонажа
+        val isWalking = moveLeft || moveRight
+        val isJumping = playerVelocity.y != 0f
+
+        val scale = 2.7f // Коэффициент масштабирования
+
+        val currentFrame = if (isWalking) {
+            showCharacter = false
+            walkAnimation?.getKeyFrame(elapsedTime)
+        } else if (isJumping) {
+            showCharacter = false
+            jumpAnimation?.getKeyFrame(elapsedTime)
+        } else {
+            null // Другие случаи (если персонаж не движется и не прыгает)
+        }
+
         batch!!.begin()
-        batch!!.draw(playerTexture, playerPosition.x, playerPosition.y, 100f, 100f)
+
+        if (currentFrame == null) {
+            showCharacter = true
+        }
+
+        if (showCharacter) {
+            // Отобразить спрайт персонажа только если флаг установлен в true
+            batch!!.draw(
+                playerTexture,
+                playerPosition.x,
+                playerPosition.y,
+                100f,
+                100f
+            )
+        }
+
+        currentFrame?.let {
+            val animationFrameWidth = it.regionWidth.toFloat() * scale
+            val animationFrameHeight = it.regionHeight.toFloat() * scale
+
+            val playerCenterX = playerPosition.x + 100 / 2
+            val playerCenterY = playerPosition.y + 100 / 2
+
+            val animationX = playerCenterX - animationFrameWidth / 2
+            val animationY = playerCenterY - animationFrameHeight / 2
+
+            batch!!.draw(
+                it,
+                animationX,
+                animationY,
+                animationFrameWidth,
+                animationFrameHeight
+            )
+        }
         batch!!.end()
-        stage!!.act(delta) // Update the stage
-        stage!!.draw() // Render the stage
     }
 
     private fun update() {
         playerVelocity.y += gravity // Применяем гравитацию
         playerPosition.add(playerVelocity) // Обновляем позицию игрока
         handleInput()
-        checkTriggers()
-
         // Ограничение, чтобы игрок не уходил под землю
         if (playerPosition.y < 0) {
             playerPosition.y = 0f
             playerVelocity.y = 0f
         }
+
         // Обрабатываем коллизии по оси X
         handleXCollision()
 
@@ -282,6 +356,12 @@ class GameScreen(private var game: MainGame) : Screen {
         if (playerPosition.x < 0) {
             playerPosition.x = 0f
         }
+        if (playerPosition.x>4300)
+        {
+            backgroundMusic?.stop()
+            game.setScreen(VictoryScreen(game))
+        }
+
         val rightBoundary = (collisionLayer!!.width * collisionLayer!!.tileWidth).toFloat()
         val playerRightEdge = playerPosition.x + playerTexture!!.width
         if (playerRightEdge > rightBoundary) {
@@ -310,7 +390,7 @@ class GameScreen(private var game: MainGame) : Screen {
                 }
             }
         }
-        }
+    }
 
     private fun handleYCollision() {
         val newPositionY = playerPosition.y + playerVelocity.y
@@ -364,11 +444,12 @@ class GameScreen(private var game: MainGame) : Screen {
             playerVelocity.y = jumpVelocity
             jumpCount++
 
+            elapsedTime = 0f // Сбросить прошедшее время анимации
         }
     }
 
     override fun resize(width: Int, height: Int) {}
-    override fun pause() {}
+    override fun pause() {backgroundMusic?.stop() }
     override fun resume() {}
     override fun hide() {}
     override fun dispose() {

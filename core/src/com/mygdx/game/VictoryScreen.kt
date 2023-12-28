@@ -24,12 +24,15 @@ class VictoryScreen(private val maingame: MainGame) : Screen {
     private val font: BitmapFont = BitmapFont()
 
     override fun show() {
+        val backgroundTexture = Texture(Gdx.files.internal("sky.png"))
+        val backgroundImage = Image(backgroundTexture)
+        backgroundImage.setSize(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
         val texture = Texture(Gdx.files.internal("Default.png"))
         val buttonStyle = ImageButton.ImageButtonStyle()
         buttonStyle.up = TextureRegionDrawable(texture)
 
         val button = ImageButton(buttonStyle)
-        button.setPosition(300f, 200f)
+        button.setPosition(600f, 200f)
         button.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
                 // Переход обратно в главное меню при нажатии кнопки "домой"
@@ -38,11 +41,16 @@ class VictoryScreen(private val maingame: MainGame) : Screen {
         })
 
         val labelStyle = Label.LabelStyle(font, font.color) // Создание стиля для текста
-        val label = Label("Вы победили!", labelStyle) // Создание объекта Label с текстом "Вы победили!"
+        font.data.setScale(7f)
+        val label = Label("You Win!!!", labelStyle) // Создание объекта Label с текстом "Вы победили!"
 
         label.setPosition(300f, 400f) // Установка позиции надписи на экране
 
+
+        stage.addActor(backgroundImage)
         stage.addActor(label) // Добавление надписи на сцену
+        stage.addActor(button)
+
         Gdx.input.inputProcessor = stage
     }
 
